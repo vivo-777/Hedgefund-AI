@@ -8,3 +8,4 @@ fastapi
 uvicorn
 python-dotenv
 pandas
+streamlit>=1.28.0
