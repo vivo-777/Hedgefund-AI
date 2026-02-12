@@ -1,5 +1,5 @@
 import os
-from langchain_groq import ChatGroq # type: ignore
+from langchain_groq import ChatGroq 
 from langchain_core.messages import SystemMessage, HumanMessage
 from src.agents.state import AgentState
 
@@ -22,7 +22,7 @@ def analyst_node(state: AgentState):
     
     print(f"--- ANALYST ANALYZING: {ticker} ---")
     
-    # 1. Construct the Context (NOW WITH DEEP FINANCIALS)
+    # 1. Construct the Context 
     context = f"""
     TICKER: {ticker}
     
@@ -47,10 +47,9 @@ def analyst_node(state: AgentState):
     --- RECENT NEWS & SENTIMENT ---
     """
     
-    # Add news with SOURCES and CONTENT (Critical for citations)
-    # Checks if 'news' is a list of dicts (standard) or something else
+
     if isinstance(news, list):
-        for i, article in enumerate(news[:5]): # Read top 5 articles
+        for i, article in enumerate(news[:5]): 
             title = article.get('title', 'No Title')
             url = article.get('url', 'No URL')
             content = article.get('content', 'No content available')
@@ -58,7 +57,7 @@ def analyst_node(state: AgentState):
     else:
         context += f"\nNo specific news data available.\n"
 
-    # 2. Define the Prompt (THE "HEDGE FUND" PERSONA)
+   
     system_prompt = """You are a veteran Hedge Fund Portfolio Manager with 20 years of experience. 
     Your job is to produce a high-conviction investment memorandum.
 
@@ -81,7 +80,7 @@ def analyst_node(state: AgentState):
 
     human_message = f"Here is the latest data for {ticker}. Write the analysis.\n\nData Context:\n{context}"
     
-    # 3. Call the LLM
+  
     messages = [
         SystemMessage(content=system_prompt),
         HumanMessage(content=human_message)
@@ -89,7 +88,7 @@ def analyst_node(state: AgentState):
     
     response = llm.invoke(messages)
     
-    # 4. Return the Draft
+   
     return {
         "analyst_draft": response.content,
         "recommendation": techs.get('overall_signal', {}).get('signal', 'Hold')
