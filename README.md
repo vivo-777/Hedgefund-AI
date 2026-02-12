@@ -35,3 +35,36 @@ graph TD
     E --> F{Risk Manager Review}
     F -- "Rejected (Needs Revision)" --> E
     F -- "Approved" --> G[Final Dashboard Output]
+
+
+Analyst Node: Aggregates data from yfinance and Tavily Search.
+
+Critique Node: Reviews the report for logical inconsistencies and "hallucinations."
+
+Orchestrator: Manages the state and context window.
+
+🚀 Key Features
+⚡ Ultra-Fast Inference: Powered by Groq LPU running Llama-3-70b for sub-second report generation.
+
+📊 Live Market Data: Real-time integration with Yahoo Finance for price, volume, and P/E ratios.
+
+📰 Sentiment Analysis: Scrapes top financial news sources to gauge market sentiment using Tavily API.
+
+📈 Technical Indicators: Automatically calculates RSI, MACD, and SMA signals.
+
+🛠️ CI/CD Pipeline: Fully automated deployment to Render on every GitHub push.
+
+🛠️ Tech Stack
+LLM Engine: Groq API (Llama 3)
+
+Orchestration: LangChain & LangGraph
+
+Frontend: Streamlit
+
+Visualization: Plotly
+
+Data Sources: yfinance (Market Data), Tavily (Search/News)
+
+Infrastructure: Render (PaaS)
+
+Built by Vivek Chavda Connect with me on www.linkedin.com/in/vivek2705
