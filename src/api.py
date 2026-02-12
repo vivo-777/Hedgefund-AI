@@ -1,15 +1,13 @@
-# src/api.py
-from fastapi import FastAPI, HTTPException # type: ignore
+
+from fastapi import FastAPI, HTTPException 
 from pydantic import BaseModel
-from src.main import app as graph_app  # Import your LangGraph agent
+from src.main import app as graph_app  
 import uvicorn # type: ignore
 
-# 1. Define Input Schema (What the API expects)
 class AnalysisRequest(BaseModel):
     ticker: str
     max_revisions: int = 2
 
-# 2. Initialize FastAPI
 api = FastAPI(title="Hedge Fund Agent API", version="1.0")
 
 @api.get("/")
@@ -22,7 +20,6 @@ async def run_analysis(request: AnalysisRequest):
     Triggers the LangGraph workflow for a specific ticker.
     """
     try:
-        # Initialize the state as we did in the dashboard
         initial_state = {
             "ticker": request.ticker,
             "max_revisions": request.max_revisions,
@@ -36,18 +33,15 @@ async def run_analysis(request: AnalysisRequest):
             "errors": []
         }
         
-        # Run the graph (this might take 10-20 seconds)
         result = await graph_app.ainvoke(initial_state)
-        
-        # Return only what the frontend needs
+
         return {
             "ticker": result["ticker"],
-            "market_data": result["market_data"], # Send the whole dict!
+            "market_data": result["market_data"],
             "analyst_draft": result["analyst_draft"],
             "critique": result["critique"],
             "news": result["news"][:3],
             "technicals": result["technicals"],
-            # ADD THIS LINE FOR THE CHART:
             "price_history": result["price_history"].reset_index().to_dict(orient='records') if result["price_history"] is not None else []
         }
     except Exception as e:
