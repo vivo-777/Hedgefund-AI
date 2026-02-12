@@ -21,7 +21,7 @@ The **AI Equity Research Agent** is a sophisticated financial analysis tool desi
 This project demonstrates the implementation of **Cyclic Graph Architectures (LangGraph)** and **Production-Grade Deployment (CI/CD)**.
 
 ---
-##[Live Demo](https://equity-agent-zdj7.onrender.com/#ai-hedge-fund-microservices)
+[Live Demo](https://equity-agent-zdj7.onrender.com/#ai-hedge-fund-microservices)
 
 ## 🏗️ Architecture
 
