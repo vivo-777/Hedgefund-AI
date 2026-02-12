@@ -1,15 +1,13 @@
 import os
 from langchain_groq import ChatGroq # type: ignore
-from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.messages import SystemMessage, HumanMessage
 from src.agents.state import AgentState
 
 # Initialize LLM
-# We use Llama 3 70B for high-quality reasoning
 llm = ChatGroq(
     api_key=os.getenv("GROQ_API_KEY"),
     model="llama-3.3-70b-versatile",
-    temperature=0.2 # Low temperature = more factual/analytical
+    temperature=0.2 
 )
 
 def analyst_node(state: AgentState):
@@ -24,16 +22,21 @@ def analyst_node(state: AgentState):
     
     print(f"--- ANALYST ANALYZING: {ticker} ---")
     
-    # 1. Construct the Context
-    # We turn the complex dictionaries into a readable string for the LLM
+    # 1. Construct the Context (NOW WITH DEEP FINANCIALS)
     context = f"""
     TICKER: {ticker}
     
-    --- MARKET DATA ---
-    Price: ${prices.get('current_price', 'N/A')}
+    --- MARKET DATA & FUNDAMENTALS ---
+    Current Price: ${prices.get('current_price', 'N/A')}
     Market Cap: {prices.get('market_cap', 'N/A')}
     P/E Ratio: {prices.get('pe_ratio', 'N/A')}
-    Volatility: {prices.get('volatility_30d', 'N/A')}%
+    Forward P/E: {prices.get('forward_pe', 'N/A')}
+    
+    Revenue Growth: {prices.get('revenue_growth', 'N/A')}
+    Profit Margins: {prices.get('profit_margins', 'N/A')}
+    Debt to Equity: {prices.get('debt_to_equity', 'N/A')}
+    Free Cash Flow: {prices.get('free_cash_flow', 'N/A')}
+    Return on Equity: {prices.get('return_on_equity', 'N/A')}
     
     --- TECHNICAL ANALYSIS ---
     RSI: {techs.get('momentum', {}).get('rsi', {}).get('value', 'N/A')} ({techs.get('momentum', {}).get('rsi', {}).get('signal', 'N/A')})
@@ -41,28 +44,42 @@ def analyst_node(state: AgentState):
     Overall Signal: {techs.get('overall_signal', {}).get('signal', 'Unknown')}
     Confidence: {techs.get('overall_signal', {}).get('confidence', '0%')}
     
-    --- RECENT NEWS ---
+    --- RECENT NEWS & SENTIMENT ---
     """
     
-    # Add top 3 news headlines
-    for i, article in enumerate(news[:3]):
-        context += f"{i+1}. {article.get('title', 'No Title')} (Source: {article.get('source', 'Unknown')})\n"
+    # Add news with SOURCES and CONTENT (Critical for citations)
+    # Checks if 'news' is a list of dicts (standard) or something else
+    if isinstance(news, list):
+        for i, article in enumerate(news[:5]): # Read top 5 articles
+            title = article.get('title', 'No Title')
+            url = article.get('url', 'No URL')
+            content = article.get('content', 'No content available')
+            context += f"\nArticle {i+1}: {title}\nSource: {url}\nSummary: {content[:400]}...\n"
+    else:
+        context += f"\nNo specific news data available.\n"
 
-    # 2. Define the Prompt
-    system_prompt = """You are a Senior Equity Analyst at a top-tier hedge fund. 
-    Your job is to write a comprehensive investment memo based STRICTLY on the provided data.
-    
-    Structure your report as follows:
-    1. **Executive Summary**: Buy/Sell/Hold recommendation with a strict confidence score.
-    2. **Fundamental Analysis**: Valuation (P/E) and market position.
-    3. **Technical Analysis**: Price action, RSI, and MACD trends.
-    4. **Sentiment Analysis**: Summary of recent news and its potential impact.
-    5. **Risk Factors**: What could go wrong?
-    
-    Tone: Professional, objective, and data-driven. 
-    Do not hallucinate data. If data is missing, state it."""
+    # 2. Define the Prompt (THE "HEDGE FUND" PERSONA)
+    system_prompt = """You are a veteran Hedge Fund Portfolio Manager with 20 years of experience. 
+    Your job is to produce a high-conviction investment memorandum.
 
-    human_message = f"Here is the latest data for {ticker}. Write the analysis.\n\nData:\n{context}"
+    ### INSTRUCTIONS:
+    1. **BE DECISIVE:** You must output a distinct signal: BUY, SELL, or HOLD. A "Hold" with low confidence is a failure.
+    2. **USE THE DATA:** You have been provided with specific financial metrics (P/E, Margins, Debt). Cite them in your analysis.
+    3. **CITE SOURCES:** You have news articles with URLs. Explicitly reference them (e.g., "According to Reuters [Source 1]...").
+    4. **NO EXCUSES:** Never say "I lack data." If a metric is missing, make a reasonable inference based on the sector and price action.
+    5. **CONFIDENCE SCORE:** You must provide a confidence score (0-100%). Scores below 50% are unacceptable; dig deeper to form a view.
+
+    ### FORMAT:
+    Structure your response as a professional Wall Street Memo:
+    1. **Executive Summary:** The Call (Buy/Sell) and the Target Price rationale.
+    2. **Fundamental Deep Dive:** Analysis of Valuation (P/E), Growth, and Balance Sheet health.
+    3. **Technical Analysis:** Price action, RSI, and MACD trends.
+    4. **Sentiment & News:** Summary of key headlines and their potential impact.
+    5. **Risks:** The bear case (e.g., high debt, falling margins).
+    
+    Tone: Professional, objective, and data-driven."""
+
+    human_message = f"Here is the latest data for {ticker}. Write the analysis.\n\nData Context:\n{context}"
     
     # 3. Call the LLM
     messages = [
@@ -75,5 +92,5 @@ def analyst_node(state: AgentState):
     # 4. Return the Draft
     return {
         "analyst_draft": response.content,
-        "recommendation": techs.get('overall_signal', {}).get('signal', 'Hold') # We stick to the math for the official tag
+        "recommendation": techs.get('overall_signal', {}).get('signal', 'Hold')
     }

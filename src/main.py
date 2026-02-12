@@ -55,6 +55,7 @@ workflow.add_conditional_edges(
 
 # 5. Compile
 app = workflow.compile()
+app.get_graph().draw_mermaid_png()
 
 # --- RUN IT ---
 if __name__ == "__main__":
@@ -79,6 +80,8 @@ if __name__ == "__main__":
     }
     
     result = app.invoke(initial_state)
+
+
     
     print("\n\n################################")
     print("FINAL REPORT")

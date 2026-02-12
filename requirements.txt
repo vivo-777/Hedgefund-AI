@@ -8,4 +8,9 @@ langchain-community
 langgraph
 python-dotenv
 ta
+<<<<<<< HEAD
 tavily-python
+=======
+tavily-python
+
+>>>>>>> 7d4bcebff7a2ff2f151749f0639d392e7ec09242

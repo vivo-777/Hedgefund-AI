@@ -1,8 +1,8 @@
 # src/api.py
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException # type: ignore
 from pydantic import BaseModel
 from src.main import app as graph_app  # Import your LangGraph agent
-import uvicorn
+import uvicorn # type: ignore
 
 # 1. Define Input Schema (What the API expects)
 class AnalysisRequest(BaseModel):
@@ -42,13 +42,14 @@ async def run_analysis(request: AnalysisRequest):
         # Return only what the frontend needs
         return {
             "ticker": result["ticker"],
-            "current_price": result["market_data"].get("current_price"),
+            "market_data": result["market_data"], # Send the whole dict!
             "analyst_draft": result["analyst_draft"],
             "critique": result["critique"],
-            "news": result["news"][:3], # Top 3 headlines
-            "technicals": result["technicals"]
+            "news": result["news"][:3],
+            "technicals": result["technicals"],
+            # ADD THIS LINE FOR THE CHART:
+            "price_history": result["price_history"].reset_index().to_dict(orient='records') if result["price_history"] is not None else []
         }
-        
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

@@ -34,7 +34,7 @@ def test_chain():
     if market_update:
         state.update(market_update) # type: ignore
     else:
-        print("❌ Market Data Node returned no data.")
+        print(" Market Data Node returned no data.")
         return
 
     # --- STEP 2: TECHNICAL ANALYSIS NODE ---
@@ -49,10 +49,10 @@ def test_chain():
     techs = state.get('technicals', {})
     
     if not techs or "error" in techs:
-        print(f"❌ Technical analysis failed: {techs.get('error')}")
+        print(f" Technical analysis failed: {techs.get('error')}")
         return
 
-    print(f"\n✅ Technical Analysis Complete!")
+    print(f"\n Technical Analysis Complete!")
     
     # 1. Momentum (RSI)
     if 'momentum' in techs:
@@ -62,14 +62,14 @@ def test_chain():
     
     # 2. Trend (MACD & ADX)
     if 'trend' in techs:
-        print(f"\n📈 Trend:")
+        print(f"\n Trend:")
         print(f"   MACD Trend: {techs['trend']['macd']['trend']}")
         print(f"   ADX Strength: {techs['trend']['adx']['value']} ({techs['trend']['adx']['strength']})")
 
     # 3. Overall Signal
     if 'overall_signal' in techs:
         signal = techs['overall_signal']
-        print(f"\n🎯 Overall Signal:")
+        print(f"\n Overall Signal:")
         print(f"   Action: {signal['signal'].upper()}")
         print(f"   Confidence: {signal['confidence']}")
         print(f"   Reasoning: {signal['reasoning']}")
